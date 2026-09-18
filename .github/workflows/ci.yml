@@ -36,6 +36,19 @@ jobs:
         pytest tests/ -v
     
     - name: Build Docker Image
-      # This step only runs if all previous steps (including tests) passed successfully.
       run: |
-        docker build -t ai-test-case-generator:${{ github.sha }} .
+        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/ai-test-generator:latest .
+        docker tag ${{ secrets.DOCKERHUB_USERNAME }}/ai-test-generator:latest ${{ secrets.DOCKERHUB_USERNAME }}/ai-test-generator:${{ github.sha }}
+        
+    - name: Log in to Docker Hub
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+    - name: Push Image to Docker Hub
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/ai-test-generator:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/ai-test-generator:${{ github.sha }}
