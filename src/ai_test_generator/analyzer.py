@@ -4,7 +4,7 @@ Analyzes Python code using AST to extract function signatures and metadata.
 """
 
 import ast
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
 
 
 class CodeAnalyzer:
@@ -130,7 +130,7 @@ class CodeAnalyzer:
         
         return class_info
     
-    def _analyze_import(self, node: ast.Import | ast.ImportFrom) -> Dict[str, Any]:
+    def _analyze_import(self, node: Union[ast.Import, ast.ImportFrom]) -> Dict[str, Any]:
         """Extract import information."""
         if isinstance(node, ast.Import):
             return {
