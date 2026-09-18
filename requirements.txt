@@ -1,0 +1,26 @@
+# Core LLM / AI dependencies
+openai>=1.0.0
+langchain>=0.1.5
+langchain-openai>=0.1.1
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# NLP / Hugging Face
+transformers>=4.30.0
+torch>=2.0.0
+
+# Configuration & CLI
+PyYAML>=6.0
+Click>=8.0.0
+rich>=13.0.0
+
+# Code analysis
+ast-comments>=1.1.2
+
+# Testing frameworks
+pytest>=7.0.0
+pytest-cov>=3.0.0
+pytest-json-report>=1.5.0
+
+# Web UI
+streamlit>=1.28.0

@@ -1,0 +1,35 @@
+# AI Test Generator Configuration
+# Copy this to .ai-test-gen.yml and customize
+
+# Test generation settings
+test_framework: pytest  # Options: pytest, unittest
+include_edge_cases: true
+include_mocks: true
+max_tests_per_function: 10
+
+# AI model settings
+model_path: null  # Path to custom trained model, or null to use default
+confidence_threshold: 0.7  # Minimum confidence for ML-suggested tests
+
+# Output settings
+output_directory: tests/
+file_naming: test_{filename}.py  # {filename} will be replaced
+
+# Code analysis settings
+analyze_complexity: true
+detect_code_smells: false
+
+# Template settings
+template_style: modern  # Options: modern, classic, minimal
+
+# CI/CD Integration
+ci_integration:
+  enabled: true
+  auto_commit: false  # Auto-commit generated tests
+  create_pr: false    # Create pull request with generated tests
+
+# Advanced settings
+advanced:
+  parallel_processing: true
+  cache_analysis: true
+  verbose_logging: false
