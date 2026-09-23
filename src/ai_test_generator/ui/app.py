@@ -9,7 +9,7 @@ if src_path not in sys.path:
 import os
 import json
 import streamlit as st
-from ai_test_generator.config import load_config, MODEL_ALIASES
+from ai_test_generator.config import load_config
 from ai_test_generator.llm.client import LLMClient
 from ai_test_generator.generators.requirement_analyzer import RequirementAnalyzer
 from ai_test_generator.generators.test_case_generator import TestCaseGenerator
@@ -19,6 +19,15 @@ from ai_test_generator.execution.sandbox import Sandbox
 from ai_test_generator.execution.docker_sandbox import DockerSandbox
 from ai_test_generator.execution.pytest_runner import PyTestRunner
 from ai_test_generator.reporting.reporters import Reporter
+
+MODEL_ALIASES = {
+    "gemini-1.5-flash": "gemini-2.5-flash",
+    "gemini-1.5-flash-latest": "gemini-2.5-flash",
+    "gemini-1.5-pro": "gemini-2.5-pro",
+    "gemini-1.5-pro-latest": "gemini-2.5-pro",
+    "gemini-3.1-pro-preview": "gemini-2.5-pro",
+    "gemini-3.6-flash": "gemini-2.5-flash",
+}
 
 def main():
     st.set_page_config(page_title="AI Test Generator", layout="wide", initial_sidebar_state="expanded")

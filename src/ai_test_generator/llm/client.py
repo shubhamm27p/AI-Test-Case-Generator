@@ -1,9 +1,18 @@
 import logging
 from langchain_openai import ChatOpenAI
-from ..config import load_config, MODEL_ALIASES
+from ..config import load_config
 from ..exceptions import LLMError
 
 logger = logging.getLogger(__name__)
+
+MODEL_ALIASES = {
+    "gemini-1.5-flash": "gemini-2.5-flash",
+    "gemini-1.5-flash-latest": "gemini-2.5-flash",
+    "gemini-1.5-pro": "gemini-2.5-pro",
+    "gemini-1.5-pro-latest": "gemini-2.5-pro",
+    "gemini-3.1-pro-preview": "gemini-2.5-pro",
+    "gemini-3.6-flash": "gemini-2.5-flash",
+}
 
 class LLMClient:
     def __init__(self, config=None):
