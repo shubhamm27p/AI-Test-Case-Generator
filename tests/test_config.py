@@ -1,5 +1,5 @@
 import os
-from ai_test_generator.config import load_config
+from ai_test_generator.config import load_config, resolve_model_name
 
 def test_load_config(monkeypatch):
     monkeypatch.setenv("AI_TEST_GEN_MODE", "mock")
@@ -20,6 +20,9 @@ def test_load_config_maps_deployed_gemini_model(monkeypatch):
     monkeypatch.setenv("OPENAI_MODEL", "gemini-3.6-flash")
     config = load_config()
     assert config.openai_model == "gemini-2.5-flash"
+
+def test_resolve_model_name_strips_and_maps_alias():
+    assert resolve_model_name(" gemini-3.6-flash ") == "gemini-2.5-flash"
 
 def test_set_mode(monkeypatch):
     import pytest

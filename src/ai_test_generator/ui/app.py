@@ -9,7 +9,7 @@ if src_path not in sys.path:
 import os
 import json
 import streamlit as st
-from ai_test_generator.config import load_config
+from ai_test_generator.config import load_config, resolve_model_name
 from ai_test_generator.llm.client import LLMClient
 from ai_test_generator.generators.requirement_analyzer import RequirementAnalyzer
 from ai_test_generator.generators.test_case_generator import TestCaseGenerator
@@ -40,7 +40,7 @@ def main():
         help="Specify the model name (e.g. gemini-2.5-flash, gpt-4o-mini). Deprecated or unsupported Gemini names are automatically mapped."
     )
     if selected_model and selected_model.strip():
-        config.openai_model = selected_model.strip()
+        config.openai_model = resolve_model_name(selected_model)
 
     st.sidebar.write(f"**Sandbox:** `{config.sandbox_type.upper()}`")
     
@@ -81,7 +81,11 @@ def main():
                 try:
                     st.session_state.test_plan = analyzer.analyze_requirement(requirement, code_context, include_api, include_perf)
                 except Exception as e:
-                    st.error(f"Error generating Test Plan: {e}")
+                    error_text = str(e)
+                    if any(marker in error_text.lower() for marker in ("429", "quota", "resource_exhausted")):
+                        st.error("Gemini quota exceeded. Wait for the provider retry window, or use an API key/model with available quota.")
+                    else:
+                        st.error(f"Error generating Test Plan: {e}")
                     status.update(label="Failed", state="error")
                     return
                 

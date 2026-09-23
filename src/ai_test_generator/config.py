@@ -18,6 +18,11 @@ MODEL_ALIASES = {
     "gemini-3.6-flash": "gemini-2.5-flash",
 }
 
+def resolve_model_name(model_name: str) -> str:
+    """Return the provider-compatible name for a configured model."""
+    normalized_name = model_name.strip()
+    return MODEL_ALIASES.get(normalized_name, normalized_name)
+
 @dataclass
 class AppConfig:
     """Application configuration container."""
@@ -71,7 +76,7 @@ def load_config(config_path: Optional[str] = None) -> AppConfig:
         load_dotenv(override=False)
 
     raw_model = _get_setting("OPENAI_MODEL", "gpt-4o-mini")
-    resolved_model = MODEL_ALIASES.get(raw_model, raw_model)
+    resolved_model = resolve_model_name(raw_model)
 
     return AppConfig(
         openai_api_key=_get_setting("OPENAI_API_KEY", ""),
