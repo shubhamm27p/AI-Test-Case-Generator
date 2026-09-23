@@ -6,12 +6,13 @@ from ..exceptions import LLMError
 logger = logging.getLogger(__name__)
 
 MODEL_ALIASES = {
-    "gemini-1.5-flash": "gemini-2.5-flash",
-    "gemini-1.5-flash-latest": "gemini-2.5-flash",
-    "gemini-1.5-pro": "gemini-2.5-pro",
-    "gemini-1.5-pro-latest": "gemini-2.5-pro",
-    "gemini-3.1-pro-preview": "gemini-2.5-pro",
-    "gemini-3.6-flash": "gemini-2.5-flash",
+    "gemini-1.5-flash": "gemini-3.6-flash",
+    "gemini-1.5-flash-latest": "gemini-3.6-flash",
+    "gemini-2.5-flash": "gemini-3.6-flash",
+    "gemini-1.5-pro": "gemini-3.1-pro-preview",
+    "gemini-1.5-pro-latest": "gemini-3.1-pro-preview",
+    "gemini-2.5-pro": "gemini-3.1-pro-preview",
+    "gemini-3.6-flash": "gemini-3.6-flash",
 }
 
 class LLMClient:

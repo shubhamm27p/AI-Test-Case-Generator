@@ -21,12 +21,13 @@ from ai_test_generator.execution.pytest_runner import PyTestRunner
 from ai_test_generator.reporting.reporters import Reporter
 
 MODEL_ALIASES = {
-    "gemini-1.5-flash": "gemini-2.5-flash",
-    "gemini-1.5-flash-latest": "gemini-2.5-flash",
-    "gemini-1.5-pro": "gemini-2.5-pro",
-    "gemini-1.5-pro-latest": "gemini-2.5-pro",
-    "gemini-3.1-pro-preview": "gemini-2.5-pro",
-    "gemini-3.6-flash": "gemini-2.5-flash",
+    "gemini-1.5-flash": "gemini-3.6-flash",
+    "gemini-1.5-flash-latest": "gemini-3.6-flash",
+    "gemini-2.5-flash": "gemini-3.6-flash",
+    "gemini-1.5-pro": "gemini-3.1-pro-preview",
+    "gemini-1.5-pro-latest": "gemini-3.1-pro-preview",
+    "gemini-2.5-pro": "gemini-3.1-pro-preview",
+    "gemini-3.6-flash": "gemini-3.6-flash",
 }
 
 def main():
@@ -46,7 +47,7 @@ def main():
     selected_model = st.sidebar.text_input(
         "Model",
         value=config.openai_model,
-        help="Specify the model name (e.g. gemini-2.5-flash, gpt-4o-mini). Deprecated or unsupported Gemini names are automatically mapped."
+        help="Specify the model name (e.g. gemini-3.6-flash, gpt-4o-mini). Deprecated Gemini names are automatically mapped."
     )
     if selected_model and selected_model.strip():
         model_name = selected_model.strip()
