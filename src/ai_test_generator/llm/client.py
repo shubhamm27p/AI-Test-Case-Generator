@@ -1,6 +1,6 @@
 import logging
 from langchain_openai import ChatOpenAI
-from ..config import load_config
+from ..config import load_config, MODEL_ALIASES
 from ..exceptions import LLMError
 
 logger = logging.getLogger(__name__)
@@ -12,13 +12,14 @@ class LLMClient:
         
         if self.mode != "mock":
             if not self.config.openai_api_key:
-                raise LLMError("OpenAI API key is not configured. Add OPENAI_API_KEY to your .env file.")
+                raise LLMError("OpenAI API key is not configured. Add OPENAI_API_KEY to your .env file or Streamlit secrets.")
                 
+            model_name = MODEL_ALIASES.get(self.config.openai_model, self.config.openai_model)
             try:
                 self.llm = ChatOpenAI(
                     api_key=self.config.openai_api_key,
                     base_url=self.config.openai_base_url if self.config.openai_base_url else None,
-                    model_name=self.config.openai_model,
+                    model_name=model_name,
                     temperature=0.2,
                     max_retries=self.config.max_retries,
                     request_timeout=self.config.execution_timeout

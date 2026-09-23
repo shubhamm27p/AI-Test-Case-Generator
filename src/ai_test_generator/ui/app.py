@@ -10,6 +10,7 @@ import os
 import json
 import streamlit as st
 from ai_test_generator.config import load_config
+from ai_test_generator.llm.client import LLMClient
 from ai_test_generator.generators.requirement_analyzer import RequirementAnalyzer
 from ai_test_generator.generators.test_case_generator import TestCaseGenerator
 from ai_test_generator.generators.pytest_generator import PyTestGenerator
@@ -26,13 +27,21 @@ def main():
     config = load_config()
     
     if config.mode != "mock" and not config.openai_api_key:
-        st.error("OpenAI API key is not configured. Add OPENAI_API_KEY to your .env file.")
+        st.error("OpenAI API key is not configured. Add OPENAI_API_KEY to your .env file or Streamlit secrets.")
         return
 
     st.sidebar.markdown("---")
     st.sidebar.subheader("Configuration")
     st.sidebar.write(f"**Mode:** `{config.mode.upper()}`")
-    st.sidebar.write(f"**Model:** `{config.openai_model}`")
+    
+    selected_model = st.sidebar.text_input(
+        "Model",
+        value=config.openai_model,
+        help="Specify the model name (e.g. gemini-3.6-flash, gpt-4o-mini). Deprecated Gemini models are automatically mapped."
+    )
+    if selected_model and selected_model.strip():
+        config.openai_model = selected_model.strip()
+
     st.sidebar.write(f"**Sandbox:** `{config.sandbox_type.upper()}`")
     
     st.sidebar.markdown("---")
@@ -66,8 +75,9 @@ def main():
                 return
 
             with st.status("Generating Assets...", expanded=True) as status:
+                llm_client = LLMClient(config=config)
                 st.write("🔍 Analyzing Requirement...")
-                analyzer = RequirementAnalyzer()
+                analyzer = RequirementAnalyzer(llm_client=llm_client)
                 try:
                     st.session_state.test_plan = analyzer.analyze_requirement(requirement, code_context, include_api, include_perf)
                 except Exception as e:
@@ -77,7 +87,7 @@ def main():
                 
                 if generate_tdd:
                     st.write("🚀 Generating Implementation (TDD)...")
-                    app_gen = AppCodeGenerator()
+                    app_gen = AppCodeGenerator(llm_client=llm_client)
                     try:
                         st.session_state.app_code = app_gen.generate_app_code(requirement, st.session_state.test_plan)
                     except Exception as e:
@@ -86,7 +96,7 @@ def main():
                         return
                         
                 st.write("📝 Generating Test Cases & Code Snippets...")
-                tc_gen = TestCaseGenerator()
+                tc_gen = TestCaseGenerator(llm_client=llm_client)
                 try:
                     st.session_state.test_cases = tc_gen.generate_test_cases(requirement, st.session_state.test_plan, code_context, include_api, include_perf)
                 except Exception as e:
@@ -95,7 +105,7 @@ def main():
                     return
                 
                 st.write("💻 Compiling PyTest Code...")
-                py_gen = PyTestGenerator()
+                py_gen = PyTestGenerator(llm_client=llm_client)
                 try:
                     st.session_state.pytest_code = py_gen.generate_code(st.session_state.test_cases, requirement, code_context)
                 except Exception as e:
