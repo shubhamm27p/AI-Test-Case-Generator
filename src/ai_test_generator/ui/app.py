@@ -9,7 +9,7 @@ if src_path not in sys.path:
 import os
 import json
 import streamlit as st
-from ai_test_generator.config import load_config, resolve_model_name
+from ai_test_generator.config import load_config, MODEL_ALIASES
 from ai_test_generator.llm.client import LLMClient
 from ai_test_generator.generators.requirement_analyzer import RequirementAnalyzer
 from ai_test_generator.generators.test_case_generator import TestCaseGenerator
@@ -40,7 +40,8 @@ def main():
         help="Specify the model name (e.g. gemini-2.5-flash, gpt-4o-mini). Deprecated or unsupported Gemini names are automatically mapped."
     )
     if selected_model and selected_model.strip():
-        config.openai_model = resolve_model_name(selected_model)
+        model_name = selected_model.strip()
+        config.openai_model = MODEL_ALIASES.get(model_name, model_name)
 
     st.sidebar.write(f"**Sandbox:** `{config.sandbox_type.upper()}`")
     
