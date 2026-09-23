@@ -47,6 +47,7 @@ def main():
     selected_model = st.sidebar.text_input(
         "Model",
         value=config.openai_model,
+        key=f"model_input_{config.openai_model}",
         help="Specify the model name (e.g. gemini-3.6-flash, gpt-4o-mini). Deprecated Gemini names are automatically mapped."
     )
     if selected_model and selected_model.strip():
