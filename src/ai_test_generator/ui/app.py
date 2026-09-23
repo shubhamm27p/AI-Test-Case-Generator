@@ -1,6 +1,14 @@
-import streamlit as st
+import sys
+from pathlib import Path
+
+# Ensure 'src' is in sys.path so 'ai_test_generator' can be imported in hosted environments like Streamlit Cloud
+src_path = str(Path(__file__).resolve().parent.parent.parent)
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
 import os
 import json
+import streamlit as st
 from ai_test_generator.config import load_config
 from ai_test_generator.generators.requirement_analyzer import RequirementAnalyzer
 from ai_test_generator.generators.test_case_generator import TestCaseGenerator
