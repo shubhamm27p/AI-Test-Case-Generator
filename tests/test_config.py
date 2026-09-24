@@ -1,4 +1,7 @@
 import os
+import sys
+from unittest.mock import MagicMock
+sys.modules['streamlit'] = MagicMock()
 from ai_test_generator.config import load_config, resolve_model_name
 
 def test_load_config(monkeypatch):
