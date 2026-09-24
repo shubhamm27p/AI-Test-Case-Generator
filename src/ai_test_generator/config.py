@@ -4,18 +4,18 @@ Configuration settings for AI Test Generator
 import os
 from dataclasses import dataclass
 from typing import Optional, Any
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 
-# Mapping of deprecated or unsupported model names to active compatible replacements.
+# Map stale deployment values to the current OpenAI model.
 MODEL_ALIASES = {
-    "gemini-1.5-flash": "gemini-3.6-flash",
-    "gemini-1.5-flash-latest": "gemini-3.6-flash",
-    "gemini-1.5-pro": "gemini-3.1-pro-preview",
-    "gemini-1.5-pro-latest": "gemini-3.1-pro-preview",
-    "gemini-2.5-flash": "gemini-3.6-flash",
-    "gemini-2.5-pro": "gemini-3.1-pro-preview",
-    "gemini-3.1-pro-preview": "gemini-3.1-pro-preview",
-    "gemini-3.6-flash": "gemini-3.6-flash",
+    "gemini-1.5-flash": "gpt-4o-mini",
+    "gemini-1.5-flash-latest": "gpt-4o-mini",
+    "gemini-1.5-pro": "gpt-4o-mini",
+    "gemini-1.5-pro-latest": "gpt-4o-mini",
+    "gemini-2.5-flash": "gpt-4o-mini",
+    "gemini-2.5-pro": "gpt-4o-mini",
+    "gemini-3.1-pro-preview": "gpt-4o-mini",
+    "gemini-3.6-flash": "gpt-4o-mini",
 }
 
 def resolve_model_name(model_name: str) -> str:
@@ -48,10 +48,14 @@ class AppConfig:
         self.mode = mode
 
 
-def _get_setting(key: str, default: Any = None) -> Any:
+def _get_setting(key: str, default: Any = None, dotenv_map: Optional[dict] = None) -> Any:
     val = os.getenv(key)
     if val is not None and val != "":
         return val
+    if dotenv_map is not None:
+        val = dotenv_map.get(key)
+        if val is not None and val != "":
+            return val
     try:
         import streamlit as st
         if hasattr(st, "secrets") and key in st.secrets:
@@ -70,24 +74,29 @@ def load_config(config_path: Optional[str] = None) -> AppConfig:
     Returns:
         AppConfig instance with populated values.
     """
-    if config_path and os.path.exists(config_path):
-        load_dotenv(config_path, override=False)
-    else:
-        load_dotenv(override=False)
+    env_path = config_path or ".env"
+    file_values = dotenv_values(env_path) if os.path.exists(env_path) else {}
 
-    raw_model = _get_setting("OPENAI_MODEL", "gpt-4o-mini")
+    openai_api_key = _get_setting("OPENAI_API_KEY", "", file_values)
+    openai_base_url = _get_setting("OPENAI_BASE_URL", None, file_values)
+    if not openai_base_url:
+        openai_base_url = "http://localhost:11434/v1" if not openai_api_key else "https://api.openai.com/v1"
+    if not openai_api_key and openai_base_url.startswith("http://localhost:11434"):
+        openai_api_key = "ollama"
+
+    raw_model = _get_setting("OPENAI_MODEL", "llama3.1", file_values)
     resolved_model = resolve_model_name(raw_model)
 
     return AppConfig(
-        openai_api_key=_get_setting("OPENAI_API_KEY", ""),
-        openai_base_url=_get_setting("OPENAI_BASE_URL", None),
+        openai_api_key=openai_api_key,
+        openai_base_url=openai_base_url,
         openai_model=resolved_model,
-        huggingface_api_key=_get_setting("HUGGINGFACE_API_KEY", ""),
-        huggingface_model=_get_setting("HUGGINGFACE_MODEL", "distilbert-base-uncased"),
-        log_level=str(_get_setting("LOG_LEVEL", "INFO")).upper(),
-        mode=str(_get_setting("AI_TEST_GEN_MODE", "live")).lower(),
-        execution_timeout=int(_get_setting("EXECUTION_TIMEOUT", "30")),
-        max_retries=int(_get_setting("MAX_RETRIES", "3")),
-        output_dir=_get_setting("OUTPUT_DIR", "tests/"),
-        sandbox_type=str(_get_setting("SANDBOX_TYPE", "local")).lower()
+        huggingface_api_key=_get_setting("HUGGINGFACE_API_KEY", "", file_values),
+        huggingface_model=_get_setting("HUGGINGFACE_MODEL", "distilbert-base-uncased", file_values),
+        log_level=str(_get_setting("LOG_LEVEL", "INFO", file_values)).upper(),
+        mode=str(_get_setting("AI_TEST_GEN_MODE", "live", file_values)).lower(),
+        execution_timeout=int(_get_setting("EXECUTION_TIMEOUT", "30", file_values)),
+        max_retries=int(_get_setting("MAX_RETRIES", "3", file_values)),
+        output_dir=_get_setting("OUTPUT_DIR", "tests/", file_values),
+        sandbox_type=str(_get_setting("SANDBOX_TYPE", "local", file_values)).lower()
     )

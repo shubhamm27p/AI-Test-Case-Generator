@@ -9,7 +9,7 @@ if src_path not in sys.path:
 import os
 import json
 import streamlit as st
-from ai_test_generator.config import load_config
+from ai_test_generator.config import load_config, resolve_model_name
 from ai_test_generator.llm.client import LLMClient
 from ai_test_generator.generators.requirement_analyzer import RequirementAnalyzer
 from ai_test_generator.generators.test_case_generator import TestCaseGenerator
@@ -19,16 +19,6 @@ from ai_test_generator.execution.sandbox import Sandbox
 from ai_test_generator.execution.docker_sandbox import DockerSandbox
 from ai_test_generator.execution.pytest_runner import PyTestRunner
 from ai_test_generator.reporting.reporters import Reporter
-
-MODEL_ALIASES = {
-    "gemini-1.5-flash": "gemini-3.6-flash",
-    "gemini-1.5-flash-latest": "gemini-3.6-flash",
-    "gemini-2.5-flash": "gemini-3.6-flash",
-    "gemini-1.5-pro": "gemini-3.1-pro-preview",
-    "gemini-1.5-pro-latest": "gemini-3.1-pro-preview",
-    "gemini-2.5-pro": "gemini-3.1-pro-preview",
-    "gemini-3.6-flash": "gemini-3.6-flash",
-}
 
 def main():
     st.set_page_config(page_title="AI Test Generator", layout="wide", initial_sidebar_state="expanded")
@@ -48,11 +38,11 @@ def main():
         "Model",
         value=config.openai_model,
         key=f"model_input_{config.openai_model}",
-        help="Specify the model name (e.g. gemini-3.6-flash, gpt-4o-mini). Deprecated Gemini names are automatically mapped."
+        help="Specify the OpenAI model name, for example gpt-4o-mini."
     )
     if selected_model and selected_model.strip():
         model_name = selected_model.strip()
-        config.openai_model = MODEL_ALIASES.get(model_name, model_name)
+        config.openai_model = resolve_model_name(model_name)
 
     st.sidebar.write(f"**Sandbox:** `{config.sandbox_type.upper()}`")
     
@@ -95,7 +85,7 @@ def main():
                 except Exception as e:
                     error_text = str(e)
                     if any(marker in error_text.lower() for marker in ("429", "quota", "resource_exhausted")):
-                        st.error("Gemini quota exceeded. Wait for the provider retry window, or use an API key/model with available quota.")
+                        st.error("API quota exceeded. Wait for the provider retry window, or use an API key/model with available quota.")
                     else:
                         st.error(f"Error generating Test Plan: {e}")
                     status.update(label="Failed", state="error")
